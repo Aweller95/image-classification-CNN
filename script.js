@@ -1,7 +1,8 @@
 const genderModel = 'https://teachablemachine.withgoogle.com/models/N4LSeLyfv/';
 const withHatModel =
   'https://teachablemachine.withgoogle.com/models/F-uJf71tq/';
-const withGlassesModel = '';
+const withGlassesModel =
+  'https://teachablemachine.withgoogle.com/models/c3VUfi5Q1/';
 
 const modelLoaded = () => {
   console.log('gender model loaded!');
@@ -13,11 +14,11 @@ const genderClassifier = ml5.imageClassifier(
   modelLoaded,
 );
 const hasHatClassifier = ml5.imageClassifier(`${withHatModel}model.json`, () =>
-  console.log('hasHatClassifier model loaded!'),
+  console.log('hasHat model loaded!'),
 );
 const hasGlassesClassifier = ml5.imageClassifier(
   `${withGlassesModel}model.json`,
-  () => console.log('hasGlassesClassifier model loaded!'),
+  () => console.log('hasGlasses model loaded!'),
 );
 
 const classify = classifier => {
@@ -62,13 +63,47 @@ const processResults = data => {
   const labelData = [];
 
   for (let i = 0; i < data.length; i++) {
-    let labelObj = {};
+    const classifier1Label = data[i][0].label;
+    const classifier2Label = data[i][1].label;
+    const classifier1Confidence = (data[i][0].confidence * 100).toFixed(2);
+    const classifier2Confidence = (data[i][1].confidence * 100).toFixed(2);
 
-    labelObj[data[i][0].label] = `${(data[i][0].confidence * 100).toFixed(2)}%`;
-    labelObj[data[i][1].label] = `${(data[i][1].confidence * 100).toFixed(2)}%`;
-    labelData.push(labelObj);
+    if (classifier1Confidence >= 90) {
+      labelData.push(
+        `Person is ${classifier1Label} (${classifier1Confidence}%)`,
+      );
+      continue;
+    } else if (classifier2Confidence >= 90) {
+      labelData.push(
+        `Person is ${classifier2Label} (${classifier2Confidence}%)`,
+      );
+      continue;
+    }
+
+    if (classifier1Confidence >= 70) {
+      labelData.push(
+        `Person is probably ${classifier1Label} (${classifier1Confidence}%)`,
+      );
+      continue;
+    } else if (classifier2Confidence >= 70) {
+      labelData.push(
+        `Person is probably ${classifier1Label} (${classifier2Confidence}%)`,
+      );
+      continue;
+    }
+
+    if (classifier1Confidence <= 50) {
+      labelData.push(
+        `Person might be ${classifier1Label} (${classifier1Confidence}%)`,
+      );
+      continue;
+    } else if (classifier2Confidence <= 50) {
+      labelData.push(
+        `Person might be ${classifier1Label} (${classifier2Confidence}%)`,
+      );
+      continue;
+    }
   }
-
   return labelData;
 };
 
@@ -78,15 +113,11 @@ const labelImages = data => {
     let labelElement = document.getElementById(`label${i}`);
 
     if (labelElement) {
-      labelElement.innerHTML = `${labelElement.innerHTML}${JSON.stringify(
-        data[i],
-        null,
-        4,
-      )}`;
+      labelElement.innerHTML = `${labelElement.innerHTML} ${data[i]}`;
     } else {
       labelElement = document.createElement('p');
       labelElement.id = `label${i}`;
-      labelElement.innerHTML = JSON.stringify(data[i], null, 4);
+      labelElement.innerHTML = data[i];
       div.appendChild(labelElement);
     }
   }
@@ -103,8 +134,8 @@ const startClassification = () => {
     classify(hasHatClassifier).then(result => {
       labelImages(processResults(result));
     });
-    // classify(hasGlassesClassifier).then(result => {
-    //   labelImages(processResults(result));
-    // });
-  }, 500);
+    classify(hasGlassesClassifier).then(result => {
+      labelImages(processResults(result));
+    });
+  }, 1000);
 };
