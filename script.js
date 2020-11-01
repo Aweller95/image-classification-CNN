@@ -1,24 +1,39 @@
-const genderModel = 'https://teachablemachine.withgoogle.com/models/N4LSeLyfv/';
-const withHatModel =
-  'https://teachablemachine.withgoogle.com/models/F-uJf71tq/';
-const withGlassesModel =
-  'https://teachablemachine.withgoogle.com/models/c3VUfi5Q1/';
+const models = {
+  tenDatapoints: {
+    genderModel: 'https://teachablemachine.withgoogle.com/models/j62IAURLG/',
+    glassesModel: 'https://teachablemachine.withgoogle.com/models/8yNVIeFL8/',
+    hatModel: 'https://teachablemachine.withgoogle.com/models/7snH9ESAz/',
+  },
+  thirtyDatapoints: {
+    genderModel: 'https://teachablemachine.withgoogle.com/models/LiC1m5aQZ/',
+    glassesModel: 'https://teachablemachine.withgoogle.com/models/4IskUfVGv/',
+    hatModel: 'https://teachablemachine.withgoogle.com/models/sgxrPrziy/',
+  },
+  fiftyDatapoints: {
+    genderModel: 'https://teachablemachine.withgoogle.com/models/SZUi3-nQ0/',
+    glassesModel: 'https://teachablemachine.withgoogle.com/models/QsODnJ6qR/',
+    hatModel: 'https://teachablemachine.withgoogle.com/models/NztAi5aMZ/',
+  },
+};
+
+const datapoints = 'fiftyDatapoints';
 
 const modelLoaded = () => {
-  console.log('gender model loaded!');
+  console.log(`${datapoints} gender model loaded!`);
   document.getElementById('go').addEventListener('click', startClassification);
 };
 
 const genderClassifier = ml5.imageClassifier(
-  `${genderModel}model.json`,
+  `${models[datapoints].genderModel}model.json`,
   modelLoaded,
 );
-const hasHatClassifier = ml5.imageClassifier(`${withHatModel}model.json`, () =>
-  console.log('hasHat model loaded!'),
+const hasHatClassifier = ml5.imageClassifier(
+  `${models[datapoints].hatModel}model.json`,
+  () => console.log(`${datapoints} hat model loaded!`),
 );
 const hasGlassesClassifier = ml5.imageClassifier(
-  `${withGlassesModel}model.json`,
-  () => console.log('hasGlasses model loaded!'),
+  `${models[datapoints].glassesModel}model.json`,
+  () => console.log(`${datapoints} glasses model loaded!`),
 );
 
 const classify = classifier => {
@@ -60,6 +75,7 @@ function createImageThumbnail(files) {
 }
 
 const processResults = data => {
+  console.log('data', data);
   const labelData = [];
 
   for (let i = 0; i < data.length; i++) {
@@ -69,38 +85,26 @@ const processResults = data => {
     const classifier2Confidence = (data[i][1].confidence * 100).toFixed(2);
 
     if (classifier1Confidence >= 90) {
-      labelData.push(
-        `Person is ${classifier1Label} (${classifier1Confidence}%)`,
-      );
+      labelData.push(`Person is ${classifier1Label}. `);
       continue;
     } else if (classifier2Confidence >= 90) {
-      labelData.push(
-        `Person is ${classifier2Label} (${classifier2Confidence}%)`,
-      );
+      labelData.push(`Person is ${classifier2Label}. `);
       continue;
     }
 
     if (classifier1Confidence >= 70) {
-      labelData.push(
-        `Person is probably ${classifier1Label} (${classifier1Confidence}%)`,
-      );
+      labelData.push(`Person is probably ${classifier1Label}. `);
       continue;
     } else if (classifier2Confidence >= 70) {
-      labelData.push(
-        `Person is probably ${classifier1Label} (${classifier2Confidence}%)`,
-      );
+      labelData.push(`Person is probably ${classifier2Label}. `);
       continue;
     }
 
-    if (classifier1Confidence <= 50) {
-      labelData.push(
-        `Person might be ${classifier1Label} (${classifier1Confidence}%)`,
-      );
+    if (classifier1Confidence > classifier2Confidence) {
+      labelData.push(`Person might be ${classifier1Label}. `);
       continue;
-    } else if (classifier2Confidence <= 50) {
-      labelData.push(
-        `Person might be ${classifier1Label} (${classifier2Confidence}%)`,
-      );
+    } else {
+      labelData.push(`Person might be ${classifier2Label}. `);
       continue;
     }
   }
@@ -116,6 +120,7 @@ const labelImages = data => {
       labelElement.innerHTML = `${labelElement.innerHTML} ${data[i]}`;
     } else {
       labelElement = document.createElement('p');
+      labelElement.classList.add('label');
       labelElement.id = `label${i}`;
       labelElement.innerHTML = data[i];
       div.appendChild(labelElement);
