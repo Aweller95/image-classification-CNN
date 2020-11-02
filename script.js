@@ -1,18 +1,18 @@
 const models = {
   tenDatapoints: {
-    genderModel: 'https://teachablemachine.withgoogle.com/models/j62IAURLG/',
-    glassesModel: 'https://teachablemachine.withgoogle.com/models/8yNVIeFL8/',
-    hatModel: 'https://teachablemachine.withgoogle.com/models/7snH9ESAz/',
+    genderModel: 'j62IAURLG',
+    glassesModel: '8yNVIeFL8',
+    hatModel: '7snH9ESAz',
   },
   thirtyDatapoints: {
-    genderModel: 'https://teachablemachine.withgoogle.com/models/LiC1m5aQZ/',
-    glassesModel: 'https://teachablemachine.withgoogle.com/models/4IskUfVGv/',
-    hatModel: 'https://teachablemachine.withgoogle.com/models/sgxrPrziy/',
+    genderModel: 'LiC1m5aQZ',
+    glassesModel: '4IskUfVGv',
+    hatModel: 'sgxrPrziy',
   },
   fiftyDatapoints: {
-    genderModel: 'https://teachablemachine.withgoogle.com/models/SZUi3-nQ0/',
-    glassesModel: 'https://teachablemachine.withgoogle.com/models/QsODnJ6qR/',
-    hatModel: 'https://teachablemachine.withgoogle.com/models/NztAi5aMZ/',
+    genderModel: 'SZUi3-nQ0',
+    glassesModel: 'QsODnJ6qR',
+    hatModel: 'NztAi5aMZ',
   },
 };
 
@@ -23,16 +23,19 @@ const modelLoaded = () => {
   document.getElementById('go').addEventListener('click', startClassification);
 };
 
+const buildURL = id =>
+  `https://storage.googleapis.com/tm-model/${id}/model.json`;
+
 const genderClassifier = ml5.imageClassifier(
-  `${models[datapoints].genderModel}model.json`,
+  buildURL(models[datapoints].genderModel),
   modelLoaded,
 );
 const hasHatClassifier = ml5.imageClassifier(
-  `${models[datapoints].hatModel}model.json`,
+  buildURL(models[datapoints].hatModel),
   () => console.log(`${datapoints} hat model loaded!`),
 );
 const hasGlassesClassifier = ml5.imageClassifier(
-  `${models[datapoints].glassesModel}model.json`,
+  buildURL(models[datapoints].glassesModel),
   () => console.log(`${datapoints} glasses model loaded!`),
 );
 
@@ -75,7 +78,6 @@ function createImageThumbnail(files) {
 }
 
 const processResults = data => {
-  console.log('data', data);
   const labelData = [];
 
   for (let i = 0; i < data.length; i++) {
