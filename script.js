@@ -87,26 +87,38 @@ const processResults = data => {
     const classifier2Confidence = (data[i][1].confidence * 100).toFixed(2);
 
     if (classifier1Confidence >= 90) {
-      labelData.push(`Person is ${classifier1Label}. `);
+      labelData.push(
+        `Person is ${classifier1Label} (${classifier1Confidence}%) `,
+      );
       continue;
     } else if (classifier2Confidence >= 90) {
-      labelData.push(`Person is ${classifier2Label}. `);
+      labelData.push(
+        `Person is ${classifier2Label} (${classifier2Confidence}%) `,
+      );
       continue;
     }
 
     if (classifier1Confidence >= 70) {
-      labelData.push(`Person is probably ${classifier1Label}. `);
+      labelData.push(
+        `Person is probably ${classifier1Label} (${classifier1Confidence}%) `,
+      );
       continue;
     } else if (classifier2Confidence >= 70) {
-      labelData.push(`Person is probably ${classifier2Label}. `);
+      labelData.push(
+        `Person is probably ${classifier2Label} (${classifier2Confidence}%) `,
+      );
       continue;
     }
 
     if (classifier1Confidence > classifier2Confidence) {
-      labelData.push(`Person might be ${classifier1Label}. `);
+      labelData.push(
+        `Person might be ${classifier1Label} (${classifier1Confidence}%) `,
+      );
       continue;
     } else {
-      labelData.push(`Person might be ${classifier2Label}. `);
+      labelData.push(
+        `Person might be ${classifier2Label} (${classifier2Confidence}%) `,
+      );
       continue;
     }
   }
@@ -119,7 +131,7 @@ const labelImages = data => {
     let labelElement = document.getElementById(`label${i}`);
 
     if (labelElement) {
-      labelElement.innerHTML = `${labelElement.innerHTML} ${data[i]}`;
+      labelElement.innerHTML = `${labelElement.innerHTML} <br/> ${data[i]}`;
     } else {
       labelElement = document.createElement('p');
       labelElement.classList.add('label');
